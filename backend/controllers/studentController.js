@@ -1,0 +1,290 @@
+import Student from '../models/Student.js';
+import ActivityLog from '../models/ActivityLog.js';
+import { ErrorResponse, asyncHandler } from '../middleware/errorMiddleware.js';
+import XLSX from 'xlsx';
+import PDFDocument from 'pdfkit';
+import bcrypt from 'bcryptjs';
+
+
+// @desc    Get all students (Admin only)
+// @route   GET /api/students
+// @access  Private/Admin
+export const getStudents = asyncHandler(async (req, res, next) => {
+  let query;
+  const reqQuery = { ...req.query };
+  const removeFields = ['select', 'sort', 'page', 'limit', 'search'];
+  removeFields.forEach((param) => delete reqQuery[param]);
+
+  let queryStr = JSON.stringify(reqQuery);
+  queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, (match) => `$${match}`);
+  let mongoQuery = JSON.parse(queryStr);
+
+  // Search filter
+  if (req.query.search) {
+    mongoQuery.$or = [
+      { name: { $regex: req.query.search, $options: 'i' } },
+      { email: { $regex: req.query.search, $options: 'i' } },
+      { collegeRollNo: { $regex: req.query.search, $options: 'i' } },
+      { universityRollNo: { $regex: req.query.search, $options: 'i' } },
+    ];
+  }
+
+  query = Student.find(mongoQuery);
+
+  // Select Fields
+  if (req.query.select) {
+    const fields = req.query.select.split(',').join(' ');
+    query = query.select(fields);
+  }
+
+  // Sort
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(',').join(' ');
+    query = query.sort(sortBy);
+  } else {
+    query = query.sort('collegeRollNo');
+  }
+
+  // Pagination
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const total = await Student.countDocuments(mongoQuery);
+
+  query = query.skip(startIndex).limit(limit);
+
+  const students = await query;
+
+  const pagination = {};
+  if (endIndex < total) {
+    pagination.next = { page: page + 1, limit };
+  }
+  if (startIndex > 0) {
+    pagination.prev = { page: page - 1, limit };
+  }
+
+  res.status(200).json({
+    success: true,
+    count: students.length,
+    pagination,
+    total,
+    data: students,
+  });
+});
+
+// @desc    Update student profile details (Student / Admin)
+// @route   PUT /api/students/:id
+// @access  Private
+export const updateStudent = asyncHandler(async (req, res, next) => {
+  let student = await Student.findById(req.params.id);
+
+  if (!student) {
+    return next(new ErrorResponse(`Student not found with id of ${req.params.id}`, 404));
+  }
+
+  // Authorize: Students can only update themselves. Admins can update anyone.
+  if (req.user.role !== 'admin' && req.user._id.toString() !== student._id.toString()) {
+    return next(new ErrorResponse('Not authorized to update this profile', 403));
+  }
+
+  // Handle file uploads (only override if new files are passed)
+  let resumePath = student.resume;
+  let photoPath = student.photo;
+
+  if (req.files) {
+    if (req.files.resume && req.files.resume[0]) {
+      resumePath = `/uploads/resumes/${req.files.resume[0].filename}`;
+    }
+    if (req.files.photo && req.files.photo[0]) {
+      photoPath = `/uploads/photos/${req.files.photo[0].filename}`;
+    }
+  }
+
+  // Parse skills
+  let skills = req.body.skills || student.skills;
+  if (req.body.skills) {
+    try {
+      skills = typeof req.body.skills === 'string' ? JSON.parse(req.body.skills) : req.body.skills;
+    } catch (e) {
+      skills = req.body.skills.split(',').map((s) => s.trim());
+    }
+  }
+
+  // Protect fields from students (e.g. CGPA, Roll No updates can be blocked or allowed. Let's allow but require admin log if CGPA changes)
+  const isCgpaChanged = req.body.cgpa && parseFloat(req.body.cgpa) !== student.cgpa;
+
+  const updateFields = {
+    ...req.body,
+    resume: resumePath,
+    photo: photoPath,
+    skills,
+  };
+
+  // Manually hash password if updated (since findByIdAndUpdate bypasses pre-save hook)
+  if (req.body.password) {
+    const salt = await bcrypt.genSalt(10);
+    updateFields.password = await bcrypt.hash(req.body.password, salt);
+  }
+
+  // If Admin changes sensitive fields, log it
+  if (req.user.role === 'admin') {
+    if (isCgpaChanged || req.body.collegeRollNo) {
+      await ActivityLog.create({
+        admin: req.user._id,
+        action: 'UPDATE_STUDENT_ACADEMICS',
+        details: `Updated academic parameters for student ${student.name} (${student.collegeRollNo}). CGPA updated to ${req.body.cgpa}`,
+      });
+    }
+  }
+
+  student = await Student.findByIdAndUpdate(req.params.id, updateFields, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: student,
+  });
+});
+
+// @desc    Delete student account (Admin only)
+// @route   DELETE /api/students/:id
+// @access  Private/Admin
+export const deleteStudent = asyncHandler(async (req, res, next) => {
+  const student = await Student.findById(req.params.id);
+
+  if (!student) {
+    return next(new ErrorResponse(`Student not found with id of ${req.params.id}`, 404));
+  }
+
+  await student.deleteOne();
+
+  // Log activity
+  await ActivityLog.create({
+    admin: req.user._id,
+    action: 'DELETE_STUDENT',
+    details: `Deleted student profile of ${student.name} (${student.collegeRollNo})`,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: {},
+  });
+});
+
+// @desc    Export students list to Excel
+// @route   GET /api/students/export/excel
+// @access  Private/Admin
+export const exportStudentsExcel = asyncHandler(async (req, res, next) => {
+  const students = await Student.find({}).sort('collegeRollNo');
+
+  // Map database entries to clean tabular format
+  const data = students.map((s) => ({
+    'Student Name': s.name,
+    'College Roll No': s.collegeRollNo,
+    'University Roll No': s.universityRollNo,
+    Email: s.email,
+    Branch: s.branch,
+    Year: s.year,
+    Section: s.section,
+    'Mobile No': s.mobileNo,
+    CGPA: s.cgpa,
+    Skills: s.skills.join(', '),
+    'Profile Status': s.isVerified ? 'Verified' : 'Pending Verification',
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Students Directory');
+
+  // Generate buffer
+  const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+  res.setHeader(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  );
+  res.setHeader(
+    'Content-Disposition',
+    'attachment; filename="students_list_' + Date.now() + '.xlsx"'
+  );
+  res.end(buffer);
+});
+
+// @desc    Export students list to PDF
+// @route   GET /api/students/export/pdf
+// @access  Private/Admin
+export const exportStudentsPDF = asyncHandler(async (req, res, next) => {
+  const students = await Student.find({}).sort('collegeRollNo');
+
+  // Create standard PDF structure
+  const doc = new PDFDocument({ margin: 30, size: 'A4' });
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader(
+    'Content-Disposition',
+    'attachment; filename="students_list_' + Date.now() + '.pdf"'
+  );
+
+  doc.pipe(res);
+
+  // Title Headers
+  doc.fontSize(18).text('CampusConnect Recruitment Directory', { align: 'center' });
+  doc.fontSize(10).text('Generated on: ' + new Date().toLocaleString(), { align: 'center' });
+  doc.moveDown(2);
+
+  // Table Columns Setup
+  const tableTop = 100;
+  const colWidths = [120, 100, 70, 40, 40, 160];
+  const colHeaders = ['Name', 'College Roll', 'Branch', 'Year', 'CGPA', 'Email'];
+
+  // Table header background
+  doc.fillColor('#1e3a8a').rect(30, tableTop - 5, 535, 20).fill();
+
+  // Print Header Texts
+  doc.fillColor('#ffffff').fontSize(10);
+  let currentX = 35;
+  colHeaders.forEach((header, index) => {
+    doc.text(header, currentX, tableTop);
+    currentX += colWidths[index];
+  });
+
+  doc.fillColor('#333333'); // Reset color
+  let currentY = tableTop + 20;
+
+  // Print rows
+  students.forEach((s) => {
+    // Check page boundaries
+    if (currentY > 750) {
+      doc.addPage();
+      currentY = 50;
+      // Print header inside new page
+      doc.fillColor('#1e3a8a').rect(30, currentY - 5, 535, 20).fill();
+      doc.fillColor('#ffffff').fontSize(10);
+      currentX = 35;
+      colHeaders.forEach((header, index) => {
+        doc.text(header, currentX, currentY);
+        currentX += colWidths[index];
+      });
+      doc.fillColor('#333333');
+      currentY += 20;
+    }
+
+    currentX = 35;
+    const rowValues = [s.name, s.collegeRollNo, s.branch, s.year.toString(), s.cgpa.toString(), s.email];
+    rowValues.forEach((val, index) => {
+      // Crop string if too long
+      const text = val.length > 25 ? val.substring(0, 22) + '...' : val;
+      doc.text(text, currentX, currentY);
+      currentX += colWidths[index];
+    });
+
+    // Draw bottom row line
+    doc.strokeColor('#e5e7eb').lineWidth(0.5).moveTo(30, currentY + 12).lineTo(565, currentY + 12).stroke();
+    currentY += 18;
+  });
+
+  doc.end();
+});

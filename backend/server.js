@@ -1,0 +1,139 @@
+
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Config and DB imports
+import connectDB from './config/db.js';
+import { errorHandler } from './middleware/errorMiddleware.js';
+
+// Route imports
+import authRoutes from './routes/authRoutes.js';
+import studentRoutes from './routes/studentRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import recruiterRoutes from './routes/recruiterRoutes.js';
+import applicationRoutes from './routes/applicationRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import bookmarkRoutes from './routes/bookmarkRoutes.js';
+
+// Initialize env variables
+dotenv.config({ override: true });
+
+// Connect to Database
+connectDB();
+
+const app = express();
+
+// Security Headers
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allows loading files locally in frontend
+  })
+);
+
+// CORS configuration
+const frontendOrigins = [
+  'https://campus-connect-pi-jade.vercel.app',
+  'http://127.0.0.1:5173',
+  'http://localhost:5173',
+  'http://127.0.0.1:5174',
+  'http://localhost:5174',
+  'http://127.0.0.1:5175',
+  'http://localhost:5175',
+  ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map((url) => url.trim()) : []),
+];
+
+app.use(
+  cors({
+    origin: frontendOrigins,
+    credentials: true,
+  })
+);
+
+// Parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Rate Limiting (General)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // Limit each IP to 200 requests per windowMs
+  message: {
+    success: false,
+    error: 'Too many requests from this IP, please try again after 15 minutes',
+  },
+});
+app.use('/api', limiter);
+
+// Resolve static paths in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve Static Uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Map Router Endpoints
+app.use('/api/auth', authRoutes);
+app.use('/api/students', studentRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/recruiters', recruiterRoutes);
+app.use('/api/applications', applicationRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/bookmarks', bookmarkRoutes);
+
+// Base route health check
+app.get('/', (req, res) => {
+  res.json({ status: 'success', message: 'InstituteConnection API is running smoothly' });
+});
+
+// Centralized Error Handling Middleware (must be registered last)
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5000;
+
+// Start server with automatic port fallback if the desired port is in use
+const startServer = (startPort, maxAttempts = 5) => {
+  let attemptsLeft = maxAttempts;
+
+  const tryListen = (portToTry) => {
+    const srv = app.listen(portToTry, () => {
+      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${portToTry}`);
+    });
+
+    srv.on('error', (err) => {
+      if (err && err.code === 'EADDRINUSE') {
+        console.error(`Port ${portToTry} is already in use.`);
+        attemptsLeft -= 1;
+        if (attemptsLeft > 0) {
+          const nextPort = portToTry + 1;
+          console.log(`Attempting to start on port ${nextPort} (${attemptsLeft} attempts left)...`);
+          // Give a small delay before retrying
+          setTimeout(() => tryListen(nextPort), 200);
+        } else {
+          console.error(`No available ports found after ${maxAttempts} attempts. Exiting.`);
+          process.exit(1);
+        }
+      } else {
+        console.error('Server error:', err);
+        process.exit(1);
+      }
+    });
+  };
+
+  tryListen(startPort);
+};
+
+startServer(Number(PORT), 10);
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err, promise) => {
+  console.error(`Unhandled Rejection Error: ${err.message}`);
+  // Close server & exit process
+  server.close(() => process.exit(1));
+});
