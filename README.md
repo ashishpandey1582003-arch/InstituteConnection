@@ -219,3 +219,5 @@ Before deploying the frontend, make sure it is configured to point to the produc
 - Routing Configuration: [App.jsx](file:///c:/Users/ASHISH%20PANDEY/OneDrive/Desktop/CampusConnect/frontend/src/App.jsx)
 - Backend Dependencies: [package.json](file:///c:/Users/ASHISH%20PANDEY/OneDrive/Desktop/CampusConnect/backend/package.json)
 - Frontend Dependencies: [package.json](file:///c:/Users/ASHISH%20PANDEY/OneDrive/Desktop/CampusConnect/frontend/package.json)
+#   I n s t i t u t e C o n n e c t i o n  
+ 
