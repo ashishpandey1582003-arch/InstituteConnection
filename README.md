@@ -1,6 +1,6 @@
-# CampusConnect 🚀
+# InstituteConnection 🚀
 
-CampusConnect is a **Campus Recruiter and Placement Management System**. It connects **Students, Recruiters, and Placement Coordinators (Admins)** in one place to manage jobs, interviews, and applications.
+InstituteConnection is a **Campus Recruiter and Placement Management System**. It connects **Students, Recruiters, and Placement Coordinators (Admins)** in one place to manage jobs, interviews, and applications.
 
 ---
 
