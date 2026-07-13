@@ -24,12 +24,37 @@ export const registerStudent = asyncHandler(async (req, res, next) => {
   } = req.body;
 
   // Check if student already exists
-  const existingStudent = await Student.findOne({
-    $or: [{ email }, { collegeRollNo }, { universityRollNo }],
-  });
+  console.log('--- REGISTRATION DEBUG ---');
+  console.log('Incoming registration values:', { email, collegeRollNo, universityRollNo });
+  
+  // Build query array filtering out undefined or empty values to avoid accidental matching
+  const orConditions = [];
+  if (email) orConditions.push({ email: email.toLowerCase() });
+  if (universityRollNo) orConditions.push({ universityRollNo });
+
+  let existingStudent = null;
+  if (orConditions.length > 0) {
+    existingStudent = await Student.findOne({ $or: orConditions });
+  }
+  console.log('existingStudent match found:', existingStudent);
 
   if (existingStudent) {
-    return next(new ErrorResponse('Student with this Email or Roll Number already exists', 400));
+    let matchField = '';
+    let matchValue = '';
+    if (email && existingStudent.email === email.toLowerCase()) {
+      matchField = 'Email';
+      matchValue = existingStudent.email;
+    } else if (universityRollNo && existingStudent.universityRollNo === universityRollNo) {
+      matchField = 'University Roll Number';
+      matchValue = existingStudent.universityRollNo;
+    }
+    
+    return next(
+      new ErrorResponse(
+        `Student with this ${matchField} (${matchValue}) already exists. Please use a different one.`,
+        400
+      )
+    );
   }
 
   // Handle uploaded files

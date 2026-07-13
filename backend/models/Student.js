@@ -10,8 +10,7 @@ const studentSchema = new mongoose.Schema(
     },
     collegeRollNo: {
       type: String,
-      required: [true, 'Please add a college roll number'],
-      unique: true,
+      required: [true, 'Please add a university name'],
       trim: true,
     },
     universityRollNo: {
