@@ -231,7 +231,7 @@ export const exportStudentsPDF = asyncHandler(async (req, res, next) => {
   doc.pipe(res);
 
   // Title Headers
-  doc.fontSize(18).text('CampusConnect Recruitment Directory', { align: 'center' });
+  doc.fontSize(18).text('InstituteConnection Recruitment Directory', { align: 'center' });
   doc.fontSize(10).text('Generated on: ' + new Date().toLocaleString(), { align: 'center' });
   doc.moveDown(2);
 

@@ -13,7 +13,7 @@ const sendEmail = async (options) => {
 
   // Define message options
   const message = {
-    from: `${process.env.SMTP_FROM_NAME || 'CampusConnect'} <${process.env.SMTP_FROM_EMAIL || 'noreply@campusconnect.edu'}>`,
+    from: `${process.env.SMTP_FROM_NAME || 'InstituteConnection'} <${process.env.SMTP_FROM_EMAIL || 'noreply@instituteconnection.edu'}>`,
     to: options.email,
     subject: options.subject,
     text: options.message,
