@@ -1,6 +1,19 @@
-const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const API_URL = rawApiUrl.replace(/\/$/, '');
-const BACKEND_URL = API_URL.replace(/\/api\/?$/, '');
+const getBackendUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    return envUrl.replace(/\/api\/?$/, '');
+  }
+  if (typeof window !== 'undefined' && window.location) {
+    const hostname = window.location.hostname;
+    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return `http://${hostname}:5000`;
+    }
+  }
+  return 'http://localhost:5000';
+};
+
+const BACKEND_URL = getBackendUrl();
+const API_URL = `${BACKEND_URL}/api`;
 
 const getFullUrl = (path) => {
   if (!path) return '';

@@ -141,6 +141,11 @@ const RecruiterDetails = () => {
                     src={getFullUrl(drive.logo)}
                     alt="Logo"
                     className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      const textNode = document.createTextNode(drive.companyName.substring(0, 2).toUpperCase());
+                      e.target.parentNode.appendChild(textNode);
+                    }}
                   />
                 ) : (
                   drive.companyName.substring(0, 2).toUpperCase()

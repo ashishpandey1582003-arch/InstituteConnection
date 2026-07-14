@@ -48,12 +48,28 @@ const frontendOrigins = [
   ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map((url) => url.trim()) : []),
 ];
 
-app.use(
-  cors({
-    origin: frontendOrigins,
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is localhost or local network IP (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+    const isLocal = 
+      origin.startsWith('http://localhost') || 
+      origin.startsWith('http://127.0.0.1') ||
+      /^http:\/\/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/.test(origin);
+      
+    const isWhitelisted = frontendOrigins.includes(origin);
+
+    if (isLocal || isWhitelisted) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 // Parsers
 app.use(express.json());

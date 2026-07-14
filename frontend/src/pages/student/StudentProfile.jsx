@@ -112,6 +112,11 @@ const StudentProfile = () => {
                   src={getFullUrl(user.photo)}
                   alt="Profile"
                   className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    const textNode = document.createTextNode(user?.name ? user.name.charAt(0).toUpperCase() : '?');
+                    e.target.parentNode.appendChild(textNode);
+                  }}
                 />
               ) : (
                 user?.name.charAt(0)
