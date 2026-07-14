@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../hooks/useAxios';
-import { BACKEND_URL } from '../../utils/apiUrls';
+import { BACKEND_URL, getFullUrl } from '../../utils/apiUrls';
 import { Search, Briefcase, Bookmark, Award, DollarSign, Calendar, SlidersHorizontal } from 'lucide-react';
 
 const StudentRecruiters = () => {
@@ -183,7 +183,7 @@ const StudentRecruiters = () => {
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-750 dark:bg-slate-850 dark:text-slate-200 font-bold overflow-hidden border border-slate-100 dark:border-slate-800">
                       {drive.logo ? (
                         <img
-                          src={`${BACKEND_URL}${drive.logo}`}
+                          src={getFullUrl(drive.logo)}
                           alt="Logo"
                           className="h-full w-full object-cover"
                         />

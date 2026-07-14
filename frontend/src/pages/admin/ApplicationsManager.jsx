@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../../hooks/useAxios';
-import { BACKEND_URL } from '../../utils/apiUrls';
+import { BACKEND_URL, getFullUrl } from '../../utils/apiUrls';
 import { Eye, Edit3, CheckCircle, ShieldAlert, Award, FileText } from 'lucide-react';
 
 const ApplicationsManager = () => {
@@ -148,7 +148,7 @@ const ApplicationsManager = () => {
                     <td className="px-6 py-4">
                       {app.resume ? (
                         <a
-                          href={`${BACKEND_URL}${app.resume}`}
+                          href={getFullUrl(app.resume)}
                           target="_blank"
                           rel="noreferrer"
                           className="font-bold text-brand-500 hover:text-brand-655"

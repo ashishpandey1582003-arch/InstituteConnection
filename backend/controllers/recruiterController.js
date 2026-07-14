@@ -1,6 +1,8 @@
 import Recruiter from '../models/Recruiter.js';
 import ActivityLog from '../models/ActivityLog.js';
 import { ErrorResponse, asyncHandler } from '../middleware/errorMiddleware.js';
+import { uploadFileToCloud } from '../utils/cloudinary.js';
+
 
 // @desc    Get all recruiters
 // @route   GET /api/recruiters
@@ -120,13 +122,16 @@ export const createRecruiter = asyncHandler(async (req, res, next) => {
 
   if (req.files) {
     if (req.files.logo && req.files.logo[0]) {
-      logoPath = `/uploads/logos/${req.files.logo[0].filename}`;
+      const localLogo = `/uploads/logos/${req.files.logo[0].filename}`;
+      logoPath = await uploadFileToCloud(req.files.logo[0], 'logos', localLogo);
     }
     if (req.files.brochure && req.files.brochure[0]) {
-      brochurePath = `/uploads/brochures/${req.files.brochure[0].filename}`;
+      const localBrochure = `/uploads/brochures/${req.files.brochure[0].filename}`;
+      brochurePath = await uploadFileToCloud(req.files.brochure[0], 'brochures', localBrochure);
     }
     if (req.files.pdfNotification && req.files.pdfNotification[0]) {
-      pdfNotificationPath = `/uploads/notifications/${req.files.pdfNotification[0].filename}`;
+      const localPdf = `/uploads/notifications/${req.files.pdfNotification[0].filename}`;
+      pdfNotificationPath = await uploadFileToCloud(req.files.pdfNotification[0], 'notifications', localPdf);
     }
   }
 
@@ -218,13 +223,16 @@ export const updateRecruiter = asyncHandler(async (req, res, next) => {
 
   if (req.files) {
     if (req.files.logo && req.files.logo[0]) {
-      logoPath = `/uploads/logos/${req.files.logo[0].filename}`;
+      const localLogo = `/uploads/logos/${req.files.logo[0].filename}`;
+      logoPath = await uploadFileToCloud(req.files.logo[0], 'logos', localLogo);
     }
     if (req.files.brochure && req.files.brochure[0]) {
-      brochurePath = `/uploads/brochures/${req.files.brochure[0].filename}`;
+      const localBrochure = `/uploads/brochures/${req.files.brochure[0].filename}`;
+      brochurePath = await uploadFileToCloud(req.files.brochure[0], 'brochures', localBrochure);
     }
     if (req.files.pdfNotification && req.files.pdfNotification[0]) {
-      pdfNotificationPath = `/uploads/notifications/${req.files.pdfNotification[0].filename}`;
+      const localPdf = `/uploads/notifications/${req.files.pdfNotification[0].filename}`;
+      pdfNotificationPath = await uploadFileToCloud(req.files.pdfNotification[0], 'notifications', localPdf);
     }
   }
 

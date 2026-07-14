@@ -18,7 +18,7 @@ const NotificationsManager = () => {
   const [notices, setNotices] = useState([]);
   const [fetchingNotices, setFetchingNotices] = useState(true);
 
-  const branchesList = ['CSE', 'IT', 'ECE', 'EE', 'ME', 'CE', 'MCA', 'MBA', 'AI/ML'];
+  const branchesList = ['CSE', 'IT', 'ECE', 'EE', 'ME', 'CE', 'MCA', 'MBA', 'CSE(AI/ML)'];
   const yearsList = [1, 2, 3, 4];
 
   const fetchNotices = async () => {

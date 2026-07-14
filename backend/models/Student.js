@@ -38,7 +38,7 @@ const studentSchema = new mongoose.Schema(
     branch: {
       type: String,
       required: [true, 'Please specify your branch'],
-      enum: ['CSE', 'ECE', 'ME', 'CE', 'EE', 'IT', 'MCA', 'MBA', 'AI/ML'],
+      enum: ['CSE', 'ECE', 'ME', 'CE', 'EE', 'IT', 'MCA', 'MBA', 'CSE(AI/ML)'],
     },
     year: {
       type: Number,

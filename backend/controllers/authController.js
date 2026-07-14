@@ -4,6 +4,8 @@ import Admin from '../models/Admin.js';
 import { ErrorResponse, asyncHandler } from '../middleware/errorMiddleware.js';
 import sendTokenResponse from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
+import { uploadFileToCloud } from '../utils/cloudinary.js';
+
 
 // @desc    Register student
 // @route   POST /api/auth/student/register
@@ -63,10 +65,12 @@ export const registerStudent = asyncHandler(async (req, res, next) => {
 
   if (req.files) {
     if (req.files.resume && req.files.resume[0]) {
-      resumePath = `/uploads/resumes/${req.files.resume[0].filename}`;
+      const localResume = `/uploads/resumes/${req.files.resume[0].filename}`;
+      resumePath = await uploadFileToCloud(req.files.resume[0], 'resumes', localResume);
     }
     if (req.files.photo && req.files.photo[0]) {
-      photoPath = `/uploads/photos/${req.files.photo[0].filename}`;
+      const localPhoto = `/uploads/photos/${req.files.photo[0].filename}`;
+      photoPath = await uploadFileToCloud(req.files.photo[0], 'photos', localPhoto);
     }
   }
 

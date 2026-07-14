@@ -12,7 +12,7 @@ const registerSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
   collegeRollNo: z.string().min(3, { message: 'Required' }),
   universityRollNo: z.string().min(3, { message: 'Required' }),
-  branch: z.enum(['CSE', 'ECE', 'ME', 'CE', 'EE', 'IT', 'MCA', 'MBA', 'AI/ML'], {
+  branch: z.enum(['CSE', 'ECE', 'ME', 'CE', 'EE', 'IT', 'MCA', 'MBA', 'CSE(AI/ML)'], {
     errorMap: () => ({ message: 'Select a valid branch' }),
   }),
   year: z.coerce.number().min(1).max(4),
@@ -291,6 +291,7 @@ const Register = () => {
                     >
                       <option value="">Select Branch</option>
                       <option value="CSE">CSE</option>
+                      <option value="CSE(AI/ML)">CSE(AI/ML)</option>
                       <option value="IT">IT</option>
                       <option value="ECE">ECE</option>
                       <option value="EE">EE</option>

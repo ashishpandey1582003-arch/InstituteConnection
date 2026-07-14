@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../hooks/useAxios';
-import { BACKEND_URL } from '../../utils/apiUrls';
+import { BACKEND_URL, getFullUrl } from '../../utils/apiUrls';
 import {
   Building2,
   Calendar,
@@ -138,7 +138,7 @@ const RecruiterDetails = () => {
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 font-bold text-slate-800 dark:bg-slate-850 dark:text-white overflow-hidden border border-slate-200">
                 {drive.logo ? (
                   <img
-                    src={`${BACKEND_URL}${drive.logo}`}
+                    src={getFullUrl(drive.logo)}
                     alt="Logo"
                     className="h-full w-full object-cover"
                   />
@@ -313,7 +313,7 @@ const RecruiterDetails = () => {
               <h5 className="text-xs font-bold text-slate-800 dark:text-white uppercase">Resources</h5>
               {drive.pdfNotification && (
                 <a
-                  href={`${BACKEND_URL}${drive.pdfNotification}`}
+                  href={getFullUrl(drive.pdfNotification)}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center justify-between rounded-xl border border-slate-100 p-3 hover:bg-slate-50 dark:border-slate-850 dark:hover:bg-slate-800"
@@ -326,7 +326,7 @@ const RecruiterDetails = () => {
               )}
               {drive.brochure && (
                 <a
-                  href={`${BACKEND_URL}${drive.brochure}`}
+                  href={getFullUrl(drive.brochure)}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center justify-between rounded-xl border border-slate-100 p-3 hover:bg-slate-50 dark:border-slate-850 dark:hover:bg-slate-800"

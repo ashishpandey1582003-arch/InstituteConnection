@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../hooks/useAxios';
-import { BACKEND_URL } from '../../utils/apiUrls';
+import { BACKEND_URL, getFullUrl } from '../../utils/apiUrls';
 import { User, FileText, Settings, ShieldCheck, Mail, Phone, BookOpen, KeyRound } from 'lucide-react';
 
 const StudentProfile = () => {
@@ -109,7 +109,7 @@ const StudentProfile = () => {
             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-100 text-3xl font-bold text-brand-700 dark:bg-brand-950 dark:text-brand-300 overflow-hidden">
               {user?.photo ? (
                 <img
-                  src={`${BACKEND_URL}${user.photo}`}
+                  src={getFullUrl(user.photo)}
                   alt="Profile"
                   className="h-full w-full object-cover"
                 />
@@ -140,7 +140,7 @@ const StudentProfile = () => {
 
           {user?.resume && (
             <a
-              href={`${BACKEND_URL}${user.resume}`}
+              href={getFullUrl(user.resume)}
               target="_blank"
               rel="noreferrer"
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-750 transition-colors"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../hooks/useAxios';
-import { API_URL, BACKEND_URL } from '../../utils/apiUrls';
+import { API_URL, BACKEND_URL, getFullUrl } from '../../utils/apiUrls';
 import { Search, Trash2, FileSpreadsheet, FileDown, GraduationCap, Users } from 'lucide-react';
 
 const ManageStudents = () => {
@@ -119,6 +119,7 @@ const ManageStudents = () => {
           >
             <option value="All">All Branches</option>
             <option value="CSE">CSE</option>
+            <option value="CSE(AI/ML)">CSE(AI/ML)</option>
             <option value="IT">IT</option>
             <option value="ECE">ECE</option>
             <option value="EE">EE</option>
@@ -126,7 +127,6 @@ const ManageStudents = () => {
             <option value="CE">CE</option>
             <option value="MCA">MCA</option>
             <option value="MBA">MBA</option>
-            <option value="AI/ML">AI/ML</option>
           </select>
 
           {/* CGPA */}
@@ -183,7 +183,7 @@ const ManageStudents = () => {
                     <td className="px-6 py-4">
                       {s.resume ? (
                         <a
-                          href={`${BACKEND_URL}${s.resume}`}
+                          href={getFullUrl(s.resume)}
                           target="_blank"
                           rel="noreferrer"
                           className="font-bold text-brand-500 hover:text-brand-655"

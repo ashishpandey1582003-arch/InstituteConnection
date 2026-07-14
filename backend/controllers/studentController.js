@@ -4,6 +4,8 @@ import { ErrorResponse, asyncHandler } from '../middleware/errorMiddleware.js';
 import XLSX from 'xlsx';
 import PDFDocument from 'pdfkit';
 import bcrypt from 'bcryptjs';
+import { uploadFileToCloud } from '../utils/cloudinary.js';
+
 
 
 // @desc    Get all students (Admin only)
@@ -94,10 +96,12 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
 
   if (req.files) {
     if (req.files.resume && req.files.resume[0]) {
-      resumePath = `/uploads/resumes/${req.files.resume[0].filename}`;
+      const localResume = `/uploads/resumes/${req.files.resume[0].filename}`;
+      resumePath = await uploadFileToCloud(req.files.resume[0], 'resumes', localResume);
     }
     if (req.files.photo && req.files.photo[0]) {
-      photoPath = `/uploads/photos/${req.files.photo[0].filename}`;
+      const localPhoto = `/uploads/photos/${req.files.photo[0].filename}`;
+      photoPath = await uploadFileToCloud(req.files.photo[0], 'photos', localPhoto);
     }
   }
 
