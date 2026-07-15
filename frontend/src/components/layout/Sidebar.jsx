@@ -66,7 +66,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <span className="text-xl font-bold">I</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-800 dark:text-white">InstituteConnection</h1>
+              <h1 className="text-lg font-bold text-slate-800 dark:text-white">CampusConnect</h1>
               <p className="text-xs text-slate-400 dark:text-slate-500">Recruitment Portal</p>
             </div>
           </div>
