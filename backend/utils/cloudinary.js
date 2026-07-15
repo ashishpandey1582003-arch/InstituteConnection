@@ -39,7 +39,7 @@ export const uploadFileToCloud = async (file, folder, fallbackPath) => {
     const resourceType = isPdf ? 'raw' : 'image';
     
     const uploadOptions = {
-      folder: `InstituteConnection/${folder}`,
+      folder: `CampusConnect/${folder}`,
       resource_type: resourceType,
     };
 

@@ -63,10 +63,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-white shadow-lg shadow-brand-500/30">
-              <span className="text-xl font-bold">I</span>
+              <span className="text-xl font-bold">C</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-800 dark:text-white">InstituteConnection</h1>
+              <h1 className="text-lg font-bold text-slate-800 dark:text-white">CampusConnect</h1>
               <p className="text-xs text-slate-400 dark:text-slate-500">Recruitment Portal</p>
             </div>
           </div>

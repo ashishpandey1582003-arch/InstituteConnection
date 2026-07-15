@@ -1,7 +1,7 @@
 {
-  "name": "institute-connection-backend",
+  "name": "campus-connect-backend",
   "version": "1.0.0",
-  "description": "Backend API for InstituteConnection Placement Management System",
+  "description": "Backend API for CampusConnect Placement Management System",
   "main": "server.js",
   "type": "module",
   "scripts": {

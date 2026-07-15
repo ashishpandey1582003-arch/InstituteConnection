@@ -462,7 +462,7 @@ const Register = () => {
                   </div>
                   {adminErrors.accessKey && <p className="mt-1 text-[11px] text-red-650">{adminErrors.accessKey.message}</p>}
                   <p className="mt-1.5 text-[10px] text-slate-500">
-                    Required to verify administrator authenticity. Default key is <code className="text-sky-600 font-mono bg-sky-50 px-1 py-0.5 rounded">instituteconnection2026</code>.
+                    Required to verify administrator authenticity. Default key is <code className="text-sky-600 font-mono bg-sky-50 px-1 py-0.5 rounded">campusconnect2026</code>.
                   </p>
                 </div>
               </div>

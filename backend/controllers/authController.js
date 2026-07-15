@@ -111,7 +111,7 @@ export const registerAdmin = asyncHandler(async (req, res, next) => {
   const { name, email, password, accessKey } = req.body;
 
   // Check if access key matches
-  const systemAccessKey = process.env.ADMIN_ACCESS_KEY || 'instituteconnection2026';
+  const systemAccessKey = process.env.ADMIN_ACCESS_KEY || 'campusconnect2026';
   if (accessKey !== systemAccessKey) {
     return next(new ErrorResponse('Invalid administrator access key', 401));
   }

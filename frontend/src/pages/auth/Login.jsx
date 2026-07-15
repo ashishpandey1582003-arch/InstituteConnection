@@ -55,7 +55,7 @@ const Login = () => {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500 text-white shadow-lg shadow-brand-500/25">
               <KeyRound className="h-6 w-6" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">InstituteConnection</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-white">CampusConnect</h1>
             <p className="text-sm text-slate-400">Recruitment & Placement Cell Portal</p>
           </div>
 

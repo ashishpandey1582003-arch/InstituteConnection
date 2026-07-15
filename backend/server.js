@@ -105,7 +105,7 @@ app.use('/api/bookmarks', bookmarkRoutes);
 
 // Base route health check
 app.get('/', (req, res) => {
-  res.json({ status: 'success', message: 'InstituteConnection API is running smoothly' });
+  res.json({ status: 'success', message: 'CampusConnect API is running smoothly' });
 });
 
 // Centralized Error Handling Middleware (must be registered last)
